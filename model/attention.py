@@ -24,7 +24,7 @@ class Attention(nn.Module):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, h):
-        super().__init__()
+        super(MultiHeadAttention, self).__init__()
         self.attention = Attention()
         self.d_model = d_model
         self.d_model_h = d_model // h

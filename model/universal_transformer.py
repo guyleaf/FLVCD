@@ -9,7 +9,7 @@ from .decoder import UTransformerDecoder
 class UniversalTransformer(nn.Module):
     def __init__(self, enc_seq_len, dec_seq_len, d_model, n_enc_vocab, n_dec_vocab, h, t_steps=5, dropout=0.5,
                  sos_index=1):
-        super().__init__()
+        super(UniversalTransformer, self).__init__()
         self.encoder = UTransformerEncoder(enc_seq_len, d_model, h, dropout)
         self.decoder = UTransformerDecoder(dec_seq_len, d_model, h, dropout)
         self.input_embed = nn.Embedding(n_enc_vocab, d_model, padding_idx=0)

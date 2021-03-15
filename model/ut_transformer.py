@@ -35,12 +35,12 @@ class UniversalTransformer(nn.Module):
         # Story Word Embedding Sum
         x = x.sum(dim=-2)
 
-        x, _ = self.enc_act(x, source_mask=story_mask)
+        x = self.enc_act(x, source_mask=story_mask)
 
         sos_tag = torch.zeros(answer.size(), dtype=torch.long, device=story.device).fill_(3)
 
         y = self.target_embed(sos_tag)
-        y, _ = self.dec_act(y, x, story_mask, answer_mask)
+        y = self.dec_act(y, x, story_mask, answer_mask)
 
         y = F.log_softmax(self.generator(y), dim=-1)
         return y

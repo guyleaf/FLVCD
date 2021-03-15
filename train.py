@@ -89,8 +89,8 @@ class UTWRS(pl.LightningModule):
         test_acc_mean = self.total_correct / self.total_nelement * 100.0
 
         tensorboard_logs = {'test_loss': test_loss_mean, "test_acc": test_acc_mean, 'step': self.current_epoch}
-        self.logger.agg_and_log_metrics(tensorboard_logs, step=self.current_epoch)
-        return outputs
+        # self.logger.agg_and_log_metrics(tensorboard_logs, step=self.current_epoch)
+        return {'log': tensorboard_logs}
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
@@ -122,11 +122,11 @@ def cli_main():
     # ------------
     # data
     # ------------
-    word_vocab = WordVocab.load_vocab("babi-qa/vocab/task1_vocab.pkl")
-    answer_vocab = WordVocab.load_vocab("babi-qa/vocab/task1_answer_vocab.pkl")
+    word_vocab = WordVocab.load_vocab("babi-qa/vocab/task16_vocab.pkl")
+    answer_vocab = WordVocab.load_vocab("babi-qa/vocab/task16_answer_vocab.pkl")
 
-    babiqa_train = BabiQADataset("babi-qa/task1_train.txt", word_vocab, answer_vocab, story_len=14, seq_len=6)
-    babiqa_test = BabiQADataset("babi-qa/task1_test.txt", word_vocab, answer_vocab, story_len=14, seq_len=6)
+    babiqa_train = BabiQADataset("babi-qa/task16_train.txt", word_vocab, answer_vocab, story_len=14, seq_len=6)
+    babiqa_test = BabiQADataset("babi-qa/task16_test.txt", word_vocab, answer_vocab, story_len=14, seq_len=6)
 
     # ------------
     # data args
