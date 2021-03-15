@@ -1,5 +1,5 @@
 import torch.nn as nn
-import torch.nn.functional as fnn
+import torch.nn.functional as F
 import torch
 import math
 
@@ -14,7 +14,7 @@ class Attention(nn.Module):
         scores = scores.masked_fill(mask == 0, -1e9)
 
         # Calculating Attention with softmax
-        attention = fnn.softmax(scores, dim=-1)
+        attention = F.softmax(scores, dim=-1)
 
         # Calculating Attention Multiplied actual value
         sum_value = torch.matmul(attention, value)

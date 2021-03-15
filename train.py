@@ -21,6 +21,7 @@ class UTWRS(pl.LightningModule):
             enc_seq_len=self.hparams.enc_seq_len,
             dec_seq_len=self.hparams.dec_seq_len, 
             d_model=self.hparams.d_model,
+            d_inner=self.hparams.d_inner,
             n_enc_vocab=self.hparams.n_enc_vocab,
             n_dec_vocab=self.hparams.n_dec_vocab,
             h=self.hparams.n_heads,
@@ -101,6 +102,7 @@ class UTWRS(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--lr', type=float, default=0.001)
         parser.add_argument('--d_model', default=64, type=int)
+        parser.add_argument('--d_inner', default=256, type=int)
         parser.add_argument('--dropout', default=0, type=float)
         parser.add_argument('--n_heads', default=8, type=int)
         parser.add_argument('--t_steps', default=4, type=int)

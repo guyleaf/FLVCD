@@ -9,14 +9,14 @@ from .ACT import ACT
 
 
 class UniversalTransformer(nn.Module):
-    def __init__(self, enc_seq_len, dec_seq_len, d_model, n_enc_vocab, n_dec_vocab, h, t_steps=5, dropout=0.5,
+    def __init__(self, enc_seq_len, dec_seq_len, d_model, d_inner, n_enc_vocab, n_dec_vocab, h, t_steps=5, dropout=0.5,
                  sos_index=1, enc_act_epilson=0.1, dec_act_epilson=0.1):
         super(UniversalTransformer, self).__init__()
-        encoder = UTransformerEncoder(enc_seq_len, d_model, h, dropout)
+        encoder = UTransformerEncoder(enc_seq_len, d_model, d_inner, h, dropout)
         enc_sinusoid_emb = PositionalEncoding(d_model, enc_seq_len)
         self.enc_act = ACT(encoder, d_model, t_steps, enc_sinusoid_emb, enc_sinusoid_emb, enc_act_epilson)
 
-        decoder = UTransformerDecoder(dec_seq_len, d_model, h, dropout)
+        decoder = UTransformerDecoder(dec_seq_len, d_model, d_inner, h, dropout)
         dec_sinusoid_emb = PositionalEncoding(d_model, dec_seq_len)
         self.dec_act = ACT(decoder, d_model, t_steps, dec_sinusoid_emb, dec_sinusoid_emb, dec_act_epilson)
 
