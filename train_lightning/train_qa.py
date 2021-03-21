@@ -41,7 +41,6 @@ class UTWRS(pl.LightningModule):
     def on_train_epoch_start(self) -> None:
         self.total_nelement = 0
         self.total_correct = 0.0
-        return super().on_train_epoch_start()
 
     def training_step(self, batch, batch_idx):
         story, _, answer = batch["story"], batch["query"], batch["answer"]
@@ -69,7 +68,6 @@ class UTWRS(pl.LightningModule):
     def on_test_epoch_start(self) -> None:
         self.total_nelement = 0
         self.total_correct = 0.0
-        return super().on_test_epoch_start()
 
     def test_step(self, batch, batch_idx):
         story, _, answer = batch["story"], batch["query"], batch["answer"]

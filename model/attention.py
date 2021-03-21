@@ -10,8 +10,9 @@ class Attention(nn.Module):
 
         # Calculating Attention Score
         scores = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(model_dim)
-
-        scores = scores.masked_fill(mask == 0, -1e9)
+        
+        # Fill -1e9 when mask == 1
+        scores = scores.masked_fill(mask, -1e9)
 
         # Calculating Attention with softmax
         attention = F.softmax(scores, dim=-1)
