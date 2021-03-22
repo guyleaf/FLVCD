@@ -4,7 +4,7 @@ from pytorch_lightning import LightningDataModule
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
 import torch
 import h5py
-import tqdm
+from tqdm import tqdm
 import numpy as np
 import os
 from typing import Optional
