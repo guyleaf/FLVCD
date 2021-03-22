@@ -86,10 +86,10 @@ class Summarizer(pl.LightningModule):
                 # -- replace the eos with its position for the length penalty use
                 seq_lens, _ = self.len_map.masked_fill(~eos_locs, max_seq_len).min(1)
                 # -- check if all beams contain eos
-                if (eos_locs.sum(1) > 0).sum(0).item() == beam_size:
+                if (eos_locs.sum(1) > 0).sum(0).detach() == beam_size:
                     # TODO: Try different terminate conditions.
                     _, ans_idx = scores.div(seq_lens.float() ** alpha).max(0)
-                    ans_idx = ans_idx.item()
+                    ans_idx = ans_idx.detach()
                     break
         return gen_seq[ans_idx][:seq_lens[ans_idx]].tolist()
 

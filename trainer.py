@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 from io import UnsupportedOperation
 
-from torch.serialization import save
 from data.dataset.bbc_task import get_bbc_file_paths, BBCDataModule, get_bbc_max_seq_len
 import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
@@ -82,7 +81,7 @@ def cli_main():
         # training
         # ------------
         tb_logger = pl_loggers.TensorBoardLogger(save_dir='logs/', name=f"{k}-fold")
-        trainer = pl.Trainer(tb_logger).from_argparse_args(args, logger=tb_logger)
+        trainer = pl.Trainer.from_argparse_args(args, logger=tb_logger)
         trainer.fit(model, data_loader)
 
 
