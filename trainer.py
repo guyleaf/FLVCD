@@ -56,15 +56,15 @@ def cli_main():
 
     train_paths = np.array(file_paths[:-2])
 
-    print(f"Training data: f{train_paths}")
     # ------------
     # K-fold
     # ------------
 
     kfold = StratifiedKFold(n_splits=3, shuffle=False)
 
-    for k, (train, val) in enumerate(tqdm(kfold.split(np.zeros(len(train_paths)), np.zeros(len(train_paths))))):
-
+    for k, (train, val) in enumerate(tqdm(kfold.split(np.zeros(len(train_paths)), np.zeros(len(train_paths)))), total=kfold.get_n_splits()):
+        print(f"Training data: f{train_paths[train]}")
+        print(f"Validation data: f{train_paths[val]}")
         # ------------
         # data loader
         # ------------
