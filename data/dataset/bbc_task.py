@@ -106,6 +106,7 @@ class BBCDataset(Dataset):
     def load_data(self, incides):
         for i in tqdm(incides, total=len(incides), desc="Loading data"):
             self._load_data(self.file_paths[i])
+        self.prepare_data()
 
     def get_labels(self, index):
         return self.data_cache[self.file_paths[index]][2]
