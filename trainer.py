@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 from train_lightning.train_utwrs import UTWRS
 from sklearn.model_selection import StratifiedKFold
 import numpy as np
-import tqdm
+from tqdm import tqdm
 
 SRC_PAD_TOKEN = 0
 TRG_PAD_TOKEN = 0
