@@ -62,7 +62,7 @@ def cli_main():
 
     kfold = StratifiedKFold(n_splits=3, shuffle=False)
 
-    for k, (train, val) in enumerate(tqdm(kfold.split(np.zeros(len(train_paths)), np.zeros(len(train_paths)))), total=kfold.get_n_splits()):
+    for k, (train, val) in enumerate(tqdm(kfold.split(np.zeros(len(train_paths)), np.zeros(len(train_paths))), total=kfold.get_n_splits())):
         print(f"Training data: f{train_paths[train]}")
         print(f"Validation data: f{train_paths[val]}")
         # ------------
