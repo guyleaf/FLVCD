@@ -54,7 +54,7 @@ def cli_main():
 
     np.random.shuffle(file_paths)
 
-    train_paths = np.numpy(file_paths[:-2])
+    train_paths = np.array(file_paths[:-2])
 
     print(f"Training data: f{train_paths}")
     # ------------
