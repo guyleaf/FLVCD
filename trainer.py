@@ -32,6 +32,7 @@ def cli_main():
     # ------------
     file_paths = []
     max_seq_length = 0
+    max_summary_length = 0
     if args.dataset == "BBC":
         file_paths = get_bbc_file_paths(args.base_folder)
         max_seq_length = get_bbc_max_seq_len(args.base_folder)
@@ -50,8 +51,8 @@ def cli_main():
     # ------------
     # Split train/test
     # ------------
-    print(f"Total number of videos: {len(file_paths)}")
-    print(f"Max length of videos: {max_seq_length}\n")
+    print(f"\nTotal number of videos: {len(file_paths)}")
+    print(f"Max length of videos: {max_seq_length}")
     print(f"Max length of summary: {max_summary_length}\n")
 
     np.random.shuffle(file_paths)
@@ -71,7 +72,7 @@ def cli_main():
         # data loader
         # ------------
         
-        data_loader = BBCDataModule(args.base_folder, train_paths[train], train_paths[val], max_seq_length, max_summary_length, args.d_model)
+        data_loader = BBCDataModule(max_seq_length, max_summary_length, args.d_model, args.base_folder, train_paths[train], train_paths[val])
 
         # ------------
         # model
