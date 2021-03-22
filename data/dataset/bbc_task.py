@@ -32,9 +32,9 @@ class BBCDataset(Dataset):
     def _load_data(self, file_path):
         with h5py.File(file_path, 'r') as f:
             if f.attrs["dataset_name"] == "BBC":
-                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features']), np.array(f['/labels'].items())]
+                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()])]
             else:
-                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features']), np.array(f['/labels'])]
+                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()])]
     
     def get_name(self, index):
         return self.data_cache[self.file_paths[index]][0]
