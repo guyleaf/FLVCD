@@ -27,7 +27,7 @@ class BBCDataset(Dataset):
         self.base_folder = base_folder
         self.file_paths = file_paths
         self.data_cache = {}
-    
+
     def _load_data(self, file_path):
         with h5py.File(self.base_folder + '/' + file_path, 'r') as f:
             if f.attrs["dataset_name"] == "BBC":
