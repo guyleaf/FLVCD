@@ -71,7 +71,7 @@ def cli_main():
         # data loader
         # ------------
         
-        data_loader = BBCDataModule(args.base_folder, train_paths[train], train_paths[val])
+        data_loader = BBCDataModule(args.base_folder, train_paths[train], train_paths[val], max_seq_length, max_summary_length, args.d_model)
 
         # ------------
         # model

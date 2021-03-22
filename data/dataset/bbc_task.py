@@ -44,21 +44,21 @@ class BBCDataset(Dataset):
         * START: 1
         * END: 0
     '''
-    def __init__(self, base_folder, file_paths, max_seq_length, max_summary_length):
+    def __init__(self, base_folder, file_paths, max_seq_length, max_summary_length, d_model):
         self.base_folder = base_folder
         self.file_paths = file_paths
         self.data_cache = {}
         self.max_seq_length = max_seq_length + 2
         self.max_summary_length = max_summary_length + 2
+        self.d_model = d_model
 
     def prepare_data(self):
         for key in self.data_cache.keys():
             features = self.data_cache[key][1]
             labels = self.data_cache[key][2].flatten()
-            d_model = features.shape[-1]
 
-            encoder = np.zeros((self.max_seq_length, d_model), dtype=np.float32)
-            decoder = np.zeros((self.max_summary_length, d_model), dtype=np.float32)
+            encoder = np.zeros((self.max_seq_length, self.d_model), dtype=np.float32)
+            decoder = np.zeros((self.max_summary_length, self.d_model), dtype=np.float32)
             target = np.zeros((self.max_summary_length, ), dtype=np.int)
             weight = np.zeros((self.max_summary_length, ), dtype=np.float32)
 
@@ -116,20 +116,23 @@ class BBCDataset(Dataset):
         return data
 
 class BBCDataModule(LightningDataModule):
-    def __init__(self, base_folder, train_paths, val_paths, test_paths=None):
+    def __init__(self, max_seq_length, max_summary_length, d_model, base_folder, train_paths, val_paths, test_paths=None):
         super().__init__()
         self.base_folder = base_folder
         self.train_paths = train_paths
         self.val_paths = val_paths
         self.test_paths = test_paths
+        self.max_seq_length = max_seq_length
+        self.max_summary_length = max_summary_length
+        self.d_model = d_model
     
     def setup(self, stage: Optional[str] = None):
         self.bbc_test = None
         if self.test_paths is not None:
-            self.bbc_test = BBCDataset(self.base_folder, self.test_paths)
+            self.bbc_test = BBCDataset(self.base_folder, self.test_paths, self.max_seq_length, self.max_summary_length, self.d_model)
     
-        self.bbc_train = BBCDataset(self.base_folder, self.train_paths)
-        self.bbc_val = BBCDataset(self.base_folder, self.val_paths)
+        self.bbc_train = BBCDataset(self.base_folder, self.train_paths, self.max_seq_length, self.max_summary_length, self.d_model)
+        self.bbc_val = BBCDataset(self.base_folder, self.val_paths, self.max_seq_length, self.max_summary_length, self.d_model)
     
     def train_dataloader(self):
         self.bbc_train.load_data(range(len(self.train_paths)))
