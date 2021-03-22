@@ -54,7 +54,7 @@ class BBCDataset(Dataset):
 
     def prepare_data(self):
         for key in self.data_cache.keys():
-            features = self.data_cache[key][1]
+            features = self.data_cache[key][1].squeeze(1)
             labels = self.data_cache[key][2].flatten()
 
             encoder = np.zeros((self.max_seq_length, self.d_model), dtype=np.float32)
@@ -81,10 +81,10 @@ class BBCDataset(Dataset):
             target[label_length:] = feature_length
 
             self.data_cache[key] = {
-                "encoder": encoder,
-                "decoder": decoder,
-                "weight": weight,
-                "target": target
+                "encoder": encoder[np.newaxis, :],
+                "decoder": decoder[np.newaxis, :],
+                "weight": weight[np.newaxis, :],
+                "target": target[np.newaxis, :],
             }
 
     def _load_data(self, file_path):
