@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from io import UnsupportedOperation
 
-from data.dataset.bbc_task import get_bbc_file_paths, BBCDataModule, get_bbc_max_seq_len
+from data.dataset.bbc_task import get_bbc_file_paths, BBCDataModule, get_bbc_max_seq_len, get_bbc_max_summary_len
 import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 
@@ -11,8 +11,8 @@ from sklearn.model_selection import StratifiedKFold
 import numpy as np
 from tqdm import tqdm
 
-SRC_PAD_TOKEN = 0
-TRG_PAD_TOKEN = 0
+SRC_PAD_TOKEN = -1
+TRG_PAD_TOKEN = -1
 
 def cli_main():
     pl.seed_everything(1234)
@@ -31,10 +31,11 @@ def cli_main():
     # data path
     # ------------
     file_paths = []
-    max_length = 0
+    max_seq_length = 0
     if args.dataset == "BBC":
         file_paths = get_bbc_file_paths(args.base_folder)
-        max_length = get_bbc_max_seq_len(args.base_folder)
+        max_seq_length = get_bbc_max_seq_len(args.base_folder)
+        max_summary_length = get_bbc_max_summary_len(args.base_folder)
     elif args.dataset == "OVSD":
         pass
     else:
@@ -43,14 +44,15 @@ def cli_main():
     # ------------
     # data args
     # ------------
-    args.enc_seq_len = max_length
-    args.dec_seq_len = max_length
+    args.enc_seq_len = max_seq_length
+    args.dec_seq_len = max_summary_length
     
     # ------------
     # Split train/test
     # ------------
     print(f"Total number of videos: {len(file_paths)}")
-    print(f"Maximum length of videos: {max_length}\n")
+    print(f"Max length of videos: {max_seq_length}\n")
+    print(f"Max length of summary: {max_summary_length}\n")
 
     np.random.shuffle(file_paths)
 

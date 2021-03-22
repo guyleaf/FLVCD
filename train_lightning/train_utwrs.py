@@ -39,11 +39,11 @@ class UTWRS(pl.LightningModule):
         enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
         # pad == 1
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
-        output = self.encoder(enc_input, src_mask)
+        enc_output = self.encoder(enc_input, src_mask)
 
         src_mask = get_pad_mask(dec_input, self.trg_pad_idx)
         trg_mask = get_self_attention_mask(dec_input)
-        output = self.decoder(output, dec_input, src_mask, trg_mask)
+        output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
         loss = F.cross_entropy(output.transpose(-1, 1), ground_truth)
 
@@ -58,11 +58,11 @@ class UTWRS(pl.LightningModule):
     def validation_step(self, data):
         enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
-        output = self.encoder(enc_input, src_mask)
+        enc_output = self.encoder(enc_input, src_mask)
 
         src_mask = get_pad_mask(dec_input, self.trg_pad_idx)
         trg_mask = get_self_attention_mask(dec_input)
-        output = self.decoder(output, dec_input, src_mask, trg_mask)
+        output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
         loss = F.cross_entropy(output.transpose(-1, 1), ground_truth)
 
