@@ -36,7 +36,7 @@ class UTEncoder(nn.Module):
         return x
 
 class UTDecoder(nn.Module):
-    def __init__(self, dec_seq_len, d_model, d_inner, h, t_steps=5, dropout=0.5, dec_act_epilson=0.1):
+    def __init__(self, enc_seq_len, dec_seq_len, d_model, d_inner, h, t_steps=5, dropout=0.5, dec_act_epilson=0.1):
         super(UTDecoder, self).__init__()
 
         decoder = UTransformerDecoder(dec_seq_len, d_model, d_inner, h, dropout)
@@ -44,7 +44,7 @@ class UTDecoder(nn.Module):
         self.dec_act = ACT(decoder, d_model, t_steps, dec_sinusoid_emb, dec_sinusoid_emb, dec_act_epilson)
 
         # TODO: Add parameter for linear output
-        self.output_fc = nn.Linear(d_model, dec_seq_len)
+        self.output_fc = nn.Linear(d_model, enc_seq_len)
 
     def forward(self, enc_output, dec_input, src_mask, tgt_mask):
         y = dec_input

@@ -25,6 +25,7 @@ class UTWRS(pl.LightningModule):
         )
         
         self.decoder = UTDecoder(
+            enc_seq_len=self.hparams.enc_seq_len,
             dec_seq_len=self.hparams.dec_seq_len,
             d_model=self.hparams.d_model,
             d_inner=self.hparams.d_inner,
@@ -45,7 +46,7 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.transpose(-1, 1), ground_truth)
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze())
 
         self.log('train_loss_step', loss, on_step=True, on_epoch=False)
         return loss
@@ -64,7 +65,7 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.transpose(-1, 1), ground_truth)
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze())
 
         return {'test_loss': loss}
 
