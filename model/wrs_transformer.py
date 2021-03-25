@@ -43,6 +43,7 @@ class UTDecoder(nn.Module):
         dec_sinusoid_emb = PositionalEncoding(d_model, dec_seq_len)
         self.dec_act = ACT(decoder, d_model, t_steps, dec_sinusoid_emb, dec_sinusoid_emb, dec_act_epilson)
 
+        # TODO: Add parameter for linear output
         self.output_fc = nn.Linear(d_model, dec_seq_len)
 
     def forward(self, enc_output, dec_input, src_mask, tgt_mask):
