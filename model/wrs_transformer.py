@@ -28,9 +28,7 @@ class UTEncoder(nn.Module):
             enc_act_epilson)
 
     def forward(self, enc_input, src_mask):
-        x = enc_input
-
-        x, _ = self.enc_1_act(x, source_mask=src_mask)
+        x, _ = self.enc_1_act(enc_input, source_mask=src_mask)
         x, _ = self.enc_2_act(x, source_mask=src_mask)
 
         return x
@@ -47,8 +45,6 @@ class UTDecoder(nn.Module):
         self.output_fc = nn.Linear(d_model, enc_seq_len)
 
     def forward(self, enc_output, dec_input, src_mask, tgt_mask):
-        y = dec_input
-
-        y, _ = self.dec_act(y, enc_output, src_mask, tgt_mask)
+        y, _ = self.dec_act(dec_input, enc_output, src_mask, tgt_mask)
         y = self.output_fc(y)
         return y

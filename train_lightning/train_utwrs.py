@@ -37,7 +37,7 @@ class UTWRS(pl.LightningModule):
         self.save_hyperparameters()
 
     def training_step(self, data, batch_idx):
-        enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
+        enc_input, dec_input, ground_truth, weight = data['encoder'], data['decoder'], data['target'], data['weight']
         # pad == 1
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
         enc_output = self.encoder(enc_input, src_mask)
@@ -46,7 +46,7 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze())
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight.squeeze()
 
         self.log('train_loss_step', loss, on_step=True, on_epoch=False)
         return loss
@@ -57,7 +57,7 @@ class UTWRS(pl.LightningModule):
         self.logger.agg_and_log_metrics(tensorboard_logs, step=self.current_epoch)
 
     def validation_step(self, data, batch_idx):
-        enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
+        enc_input, dec_input, ground_truth, weight = data['encoder'], data['decoder'], data['target'], data['weight']
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
         enc_output = self.encoder(enc_input, src_mask)
 
@@ -65,7 +65,7 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze())
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight.squeeze()
 
         return {'test_loss': loss}
 
