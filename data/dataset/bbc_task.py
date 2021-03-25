@@ -81,10 +81,10 @@ class BBCDataset(Dataset):
             target[label_length:] = feature_length
 
             self.data_cache[key] = {
-                "encoder": encoder[np.newaxis, :],
-                "decoder": decoder[np.newaxis, :],
-                "weight": weight[np.newaxis, :],
-                "target": target[np.newaxis, :],
+                "encoder": encoder,
+                "decoder": decoder,
+                "weight": weight,
+                "target": target,
             }
 
     def _load_data(self, file_path):
