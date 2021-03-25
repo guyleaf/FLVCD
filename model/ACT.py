@@ -7,11 +7,10 @@ class ACT(nn.Module):
         super(ACT, self).__init__()
         self.p = nn.Linear(hidden_size,1)  
         nn.init.ones_(self.p.bias)
-        
-        self.register_buffer("threshold", 1 - act_epilson)
-        self.register_buffer("max_hop", max_hop)
 
+        self.threshold = 1 - act_epilson
         self.fn = fn
+        self.max_hop = max_hop
         self.timestamp_emb = timestamp_emb
         self.position_emb = position_emb
 
