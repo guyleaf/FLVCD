@@ -7,10 +7,11 @@ class ACT(nn.Module):
         super(ACT, self).__init__()
         self.p = nn.Linear(hidden_size,1)  
         nn.init.ones_(self.p.bias)
+        
+        self.register_buffer("threshold", 1 - act_epilson)
+        self.register_buffer("max_hop", max_hop)
 
-        self.threshold = 1 - act_epilson
         self.fn = fn
-        self.max_hop = max_hop
         self.timestamp_emb = timestamp_emb
         self.position_emb = position_emb
 
@@ -18,13 +19,13 @@ class ACT(nn.Module):
         # init_hdd
         update_shape = state.shape[:-1]
         ## [batch, seq, 1]
-        halting_probability = torch.zeros(update_shape, device=state.device)
+        halting_probability = torch.zeros(update_shape).type_as(state)
         ## [batch, seq]
-        remainders = torch.zeros(update_shape, device=state.device)
+        remainders = torch.zeros(update_shape).type_as(state)
         ## [batch, seq, 1]
-        n_updates = torch.zeros(update_shape, device=state.device)
+        n_updates = torch.zeros(update_shape).type_as(state)
         ## [batch, seq, hidden]
-        previous_state = torch.zeros_like(state, device=state.device)
+        previous_state = torch.zeros_like(state).type_as(state)
         step = 0
         # for l in range(self.num_layers):
         while(((halting_probability < self.threshold) & (n_updates < self.max_hop)).byte().any()):

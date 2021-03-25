@@ -30,15 +30,15 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, h):
         super(MultiHeadAttention, self).__init__()
         self.attention = Attention()
-        self.d_model = d_model
-        self.d_model_h = d_model // h
+        self.register_buffer("d_model", d_model)
+        self.register_buffer("d_model_h", d_model // h)
+        self.register_buffer("h", h)
 
         # todo: linear should be defined with each H (e.g W_i of H)
         self.linears = nn.ModuleList([nn.Linear(self.d_model, self.d_model) for _ in range(3)])
-        self.h = h
 
     def forward(self, query, key, value, mask=None):
-        batch_size, d_model = query.size(0), query.size(-1)
+        batch_size = query.size(0)
 
         if mask is not None:
             mask = mask.unsqueeze(1)

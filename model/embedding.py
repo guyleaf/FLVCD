@@ -8,8 +8,8 @@ class PositionalEncoding(nn.Module):
 
     def __init__(self, d_model, seq_len, min_timescale=1.0, max_timescale=1.0e4, start_index=0):
         super().__init__()
-        self.seq_len = seq_len
-        self.d_model = d_model
+        self.register_buffer("seq_len", seq_len)
+        self.register_buffer("d_model", d_model)
 
         # Compute the positional encodings once in log space.
         position = torch.arange(0, seq_len).unsqueeze(1)
@@ -22,10 +22,8 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x, step):
-        device = x.device
-
         x = x + self.pe[:, :x.size(1)]
-        pe = torch.zeros(self.seq_len, self.d_model, device=device)
+        pe = torch.zeros(self.seq_len, self.d_model).type_as(x)
         pe[:, 0::2] = torch.sin(step * self.div_term)
         pe[:, 1::2] = torch.cos(step * self.div_term)
         x = x + pe

@@ -8,5 +8,5 @@ def get_self_attention_mask(seq):
     # batch, seq_len, hidden
     _, len_s, _ = seq.size()
     atten_mask = (torch.triu(
-        torch.ones((1, len_s, len_s), device=seq.device), diagonal=1)).bool()
+        torch.ones((1, len_s, len_s)), diagonal=1)).type_as(seq).bool()
     return atten_mask

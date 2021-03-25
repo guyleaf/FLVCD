@@ -65,7 +65,7 @@ class Conv(nn.Module):
         self.conv = nn.Conv1d(input_size, output_size, kernel_size=kernel_size, padding=0)
 
     def forward(self, inputs):
-        inputs = self.pad(inputs.permute(0, 2, 1))
-        outputs = self.conv(inputs).permute(0, 2, 1)
+        y = self.pad(inputs.permute(0, 2, 1))
+        y = self.conv(y).permute(0, 2, 1)
 
-        return outputs
+        return y

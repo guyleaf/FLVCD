@@ -11,8 +11,8 @@ class UTWRS(pl.LightningModule):
     def __init__(self, hparams, src_pad_idx=0, trg_pad_idx=0):
         super().__init__()
         self.hparams = hparams
-        self.src_pad_idx = src_pad_idx
-        self.trg_pad_idx = trg_pad_idx
+        self.register_buffer("src_pad_idx", src_pad_idx)
+        self.register_buffer("trg_pad_idx", trg_pad_idx)
 
         self.encoder = UTEncoder(
             enc_seq_len=self.hparams.enc_seq_len,
