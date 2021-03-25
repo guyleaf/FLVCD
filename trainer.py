@@ -45,8 +45,9 @@ def cli_main():
     # ------------
     # data args
     # ------------
-    args.enc_seq_len = max_seq_length
-    args.dec_seq_len = max_summary_length
+    # Add <START> and <END> token
+    args.enc_seq_len = max_seq_length + 2
+    args.dec_seq_len = max_summary_length + 2
     
     # ------------
     # Split train/test
