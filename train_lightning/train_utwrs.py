@@ -35,7 +35,7 @@ class UTWRS(pl.LightningModule):
         )
         self.save_hyperparameters()
 
-    def training_step(self, data):
+    def training_step(self, data, batch_idx):
         enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
         # pad == 1
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
@@ -55,7 +55,7 @@ class UTWRS(pl.LightningModule):
         tensorboard_logs = {'train_loss_epoch': avg_loss}
         self.logger.agg_and_log_metrics(tensorboard_logs, step=self.current_epoch)
 
-    def validation_step(self, data):
+    def validation_step(self, data, batch_idx):
         enc_input, dec_input, ground_truth = data['encoder'], data['decoder'], data['target']
         src_mask = get_pad_mask(enc_input, self.src_pad_idx)
         enc_output = self.encoder(enc_input, src_mask)
