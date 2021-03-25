@@ -1,7 +1,7 @@
 import torch
 
 def get_pad_mask(seq, pad_token):
-    return (seq == pad_token).all(-1).squeeze(-1)
+    return (seq == pad_token).all(-1).unsqueeze(-1)
 
 def get_self_attention_mask(seq):
     ''' For masking out the future info. '''

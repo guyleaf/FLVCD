@@ -37,6 +37,9 @@ class MultiHeadAttention(nn.Module):
     def forward(self, query, key, value, mask=None):
         batch_size, d_model = query.size(0), query.size(-1)
 
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+
         # Making Distributed Tensor by H
         _query, _key, _value = [linear(x).view(batch_size, -1, self.h, self.d_model_h).transpose(1, 2)
                                 for linear, x in zip(self.linears, [query, key, value])]
