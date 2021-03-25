@@ -136,13 +136,13 @@ class BBCDataModule(LightningDataModule):
     
     def train_dataloader(self):
         self.bbc_train.load_data(range(len(self.train_paths)))
-        return AsynchronousLoader(DataLoader(self.bbc_train, num_workers=0, pin_memory=True))
+        return AsynchronousLoader(DataLoader(self.bbc_train, num_workers=4, pin_memory=True))
     
     def val_dataloader(self):
         self.bbc_val.load_data(range(len(self.val_paths)))
-        return AsynchronousLoader(DataLoader(self.bbc_val, num_workers=0, pin_memory=True))
+        return AsynchronousLoader(DataLoader(self.bbc_val, num_workers=4, pin_memory=True))
     
     def test_dataloader(self):
         if self.bbc_test is not None:
             self.bbc_test.load_data(range(len(self.test_paths)))
-            return AsynchronousLoader(DataLoader(self.bbc_test, num_workers=0, pin_memory=True))
+            return AsynchronousLoader(DataLoader(self.bbc_test, num_workers=4, pin_memory=True))
