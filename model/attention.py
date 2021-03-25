@@ -11,8 +11,11 @@ class Attention(nn.Module):
         # Calculating Attention Score
         scores = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(model_dim)
         
+        # Reference: https://discuss.pytorch.org/t/runtimeerror-value-cannot-be-converted-to-type-at-half-without-overflow-1e-30/109768
+        _MASKING_VALUE = -1e+30 if scores.dtype == torch.float32 else -1e+4
+
         # Fill -1e9 when mask == 1
-        scores = scores.masked_fill(mask, -1e9)
+        scores = scores.masked_fill(mask, _MASKING_VALUE)
 
         # Calculating Attention with softmax
         attention = F.softmax(scores, dim=-1)
