@@ -48,7 +48,7 @@ class UTWRS(pl.LightningModule):
 
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight.squeeze()
 
-        self.log('train_loss_step', loss, on_step=True, on_epoch=False)
+        self.log('train_loss_step', loss, on_step=True, on_epoch=False, sync_dist=True)
         return loss
 
     def training_epoch_end(self, outputs):

@@ -48,7 +48,7 @@ class MultiHeadAttention(nn.Module):
                                 for linear, x in zip(self.linears, [query, key, value])]
 
         # Applying Dot-Product Attention
-        attention, sum_value = self.attention(_query, _key, _value, mask)
+        _, sum_value = self.attention(_query, _key, _value, mask)
 
         # Concat H distributed Attention
         # attention = attention.view(batch_size, query.size(1), _key.size(1))
