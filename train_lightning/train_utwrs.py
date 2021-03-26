@@ -79,10 +79,12 @@ class UTWRS(pl.LightningModule):
         self.log_dict({'test_loss': loss.detach(), 'step': self.current_epoch})
 
     def validation_epoch_end(self, _):
-        test_loss_mean = torch.stack(self.val_loss).mean()
-
-        tensorboard_logs = {'test_loss': test_loss_mean, 'step': self.current_epoch}
-        return {'log': tensorboard_logs}
+        if self.val_loss:
+            test_loss_mean = torch.stack(self.val_loss).mean()
+            tensorboard_logs = {'test_loss': test_loss_mean, 'step': self.current_epoch}
+            return {'log': tensorboard_logs}
+        else:
+            return
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
