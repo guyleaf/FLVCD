@@ -8,8 +8,10 @@ class Attention(nn.Module):
     def forward(self, query, key, value, mask):
         model_dim = query.size(-1)
 
+        query /= math.sqrt(model_dim)
+
         # Calculating Attention Score
-        scores = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(model_dim)
+        scores = torch.matmul(query, key.transpose(-1, -2))
         
         # Reference: https://discuss.pytorch.org/t/runtimeerror-value-cannot-be-converted-to-type-at-half-without-overflow-1e-30/109768
         _MASKING_VALUE = -1e+30 if scores.dtype == torch.float32 else -1e+4
