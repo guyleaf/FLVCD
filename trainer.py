@@ -87,7 +87,7 @@ def cli_main():
         # ------------
         # training
         # ------------
-        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3)
+        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3, monitor='test_loss', save_last=True)
         profiler = PyTorchProfiler(output_filename=f"{k}-fold_profiler", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
         neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold_logger")
         trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler, checkpoint_callback=model_checkpoint, track_grad_norm=2, log_every_n_steps=1000)
