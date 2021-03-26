@@ -46,7 +46,9 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight.squeeze()
+        weight = weight.squeeze()
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
+        loss = loss.sum()/weight.sum()
 
         self.log('train_loss_step', loss, on_step=True, on_epoch=False, sync_dist=True)
         return loss
@@ -65,8 +67,9 @@ class UTWRS(pl.LightningModule):
         trg_mask = get_self_attention_mask(dec_input)
         output = self.decoder(enc_output, dec_input, src_mask, trg_mask)
 
-        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight.squeeze()
-
+        weight = weight.squeeze()
+        loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
+        loss = loss.sum()/weight.sum()
         return {'test_loss': loss}
 
     def validation_epoch_end(self, outputs):
