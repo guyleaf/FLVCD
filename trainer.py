@@ -5,6 +5,7 @@ from data.dataset.bbc_task import get_bbc_file_paths, BBCDataModule, get_bbc_max
 import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 from pytorch_lightning.profiler import PyTorchProfiler
+from pytorch_lightning.loggers.neptune import NeptuneLogger
 
 
 from train_lightning.train_utwrs import UTWRS
@@ -86,8 +87,8 @@ def cli_main():
         # training
         # ------------
         profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
-        tb_logger = pl_loggers.TensorBoardLogger(save_dir='logs/', name=f"{k}-fold")
-        trainer = pl.Trainer.from_argparse_args(args, logger=tb_logger, profiler=profiler)
+        neptune_logger = NeptuneLogger(api_key="NTUT", project_name="UTWRS", params=args, experiment_name=f"{k+1}-fold")
+        trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler)
         trainer.fit(model, data_loader)
 
 
