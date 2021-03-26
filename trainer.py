@@ -15,7 +15,6 @@ from tqdm import tqdm
 
 SRC_PAD_TOKEN = -1
 TRG_PAD_TOKEN = -1
-API_KEY = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiYWViZmYxOGEtNTg0Ni00ZTQ2LWE3NzQtZDRiMWJkNmI4MjJlIn0="
 
 def cli_main():
     pl.seed_everything(1234)
@@ -88,7 +87,7 @@ def cli_main():
         # training
         # ------------
         profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
-        neptune_logger = NeptuneLogger(api_key=API_KEY, project_name="guyleaf/UTWRS", params=args, experiment_name=f"{k+1}-fold")
+        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=args, experiment_name=f"{k+1}-fold")
         trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler)
         trainer.fit(model, data_loader)
 
