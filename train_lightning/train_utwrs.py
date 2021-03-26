@@ -56,8 +56,8 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.log('train_loss', loss.detach().numpy(), on_step=False, on_epoch=True)
-        self.train_loss.append(loss.detach().numpy())
+        self.log('train_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
+        self.train_loss.append(loss.detach().cpu().numpy())
         return loss
 
     def training_epoch_end(self, _):
@@ -81,8 +81,8 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.val_loss.append(loss.detach().numpy())
-        self.log('test_loss', loss.detach().numpy(), on_step=False, on_epoch=True)
+        self.val_loss.append(loss.detach().cpu().numpy())
+        self.log('test_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
 
     def validation_epoch_end(self, _):
         if self.val_loss:
