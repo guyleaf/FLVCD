@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 from pytorch_lightning.profiler import PyTorchProfiler
 from pytorch_lightning.loggers.neptune import NeptuneLogger
+from pytorch_lightning.callbacks import ModelCheckpoint, model_checkpoint
 
 
 from train_lightning.train_utwrs import UTWRS
@@ -86,10 +87,19 @@ def cli_main():
         # ------------
         # training
         # ------------
-        profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
-        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold")
-        trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler)
+        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3)
+        profiler = PyTorchProfiler(output_filename=f"{k}-fold_profiler", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
+        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold_logger")
+        trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler, checkpoint_callback=model_checkpoint, track_grad_norm=2, log_every_n_steps=1000)
         trainer.fit(model, data_loader)
+
+        # Log model checkpoint to Neptune
+        for k in model_checkpoint.best_k_models.keys():
+            model_name = 'checkpoints/' + k.split('/')[-1]
+            neptune_logger.experiment.log_artifact(k, model_name)
+
+        # Log score of the best model checkpoint.
+        neptune_logger.experiment.set_property('best_model_score', model_checkpoint.best_model_score.tolist())
 
 
 if __name__ == '__main__':
