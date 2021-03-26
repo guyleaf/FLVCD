@@ -87,7 +87,7 @@ def cli_main():
         # training
         # ------------
         profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
-        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=args, experiment_name=f"{k+1}-fold")
+        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold")
         trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler)
         trainer.fit(model, data_loader)
 
