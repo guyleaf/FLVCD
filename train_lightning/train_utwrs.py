@@ -15,8 +15,6 @@ class UTWRS(pl.LightningModule):
         self.src_pad_idx = src_pad_idx
         self.trg_pad_idx = trg_pad_idx
 
-        self.val_loss = []
-        self.train_loss = []
         self.encoder = UTEncoder(
             enc_seq_len=self.hparams.enc_seq_len,
             d_model=self.hparams.d_model,
@@ -39,9 +37,6 @@ class UTWRS(pl.LightningModule):
         )
         self.save_hyperparameters()
 
-    def on_train_epoch_start(self):
-        self.train_loss = []
-
     def training_step(self, data, batch_idx):
         enc_input, dec_input, ground_truth, weight = data['encoder'], data['decoder'], data['target'], data['weight']
         # pad == 1
@@ -57,16 +52,7 @@ class UTWRS(pl.LightningModule):
         loss = loss.sum()/weight.sum()
 
         self.log('train_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
-        self.train_loss.append(loss.detach().cpu().numpy())
         return loss
-
-    def training_epoch_end(self, _):
-        if self.train_loss:
-            train_loss_mean = np.stack(self.train_loss).mean()
-            self.log('train_loss_mean', train_loss_mean, on_step=False, on_epoch=True)
-
-    def on_validation_epoch_start(self):
-        self.val_loss = []
 
     def validation_step(self, data, batch_idx):
         enc_input, dec_input, ground_truth, weight = data['encoder'], data['decoder'], data['target'], data['weight']
@@ -81,13 +67,7 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.val_loss.append(loss.detach().cpu().numpy())
         self.log('test_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
-
-    def validation_epoch_end(self, _):
-        if self.val_loss:
-            test_loss_mean = np.stack(self.val_loss).mean()
-            self.log('test_loss_mean', test_loss_mean, on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
