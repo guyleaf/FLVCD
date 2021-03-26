@@ -85,7 +85,7 @@ def cli_main():
         # ------------
         # training
         # ------------
-        profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True)
+        profiler = PyTorchProfiler(output_filename=f"{k}-fold", use_cuda=True, profile_memory=True, sort_by_key="CUDA Mem")
         tb_logger = pl_loggers.TensorBoardLogger(save_dir='logs/', name=f"{k}-fold")
         trainer = pl.Trainer.from_argparse_args(args, logger=tb_logger, profiler=profiler)
         trainer.fit(model, data_loader)
