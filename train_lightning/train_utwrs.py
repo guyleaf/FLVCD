@@ -51,7 +51,7 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.log('train_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, data, batch_idx):
@@ -67,7 +67,7 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.log('test_loss', loss.detach().cpu().numpy(), on_step=False, on_epoch=True)
+        self.log('test_loss', loss, on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
