@@ -14,6 +14,7 @@ class UTWRS(pl.LightningModule):
         self.src_pad_idx = src_pad_idx
         self.trg_pad_idx = trg_pad_idx
 
+        self.val_loss = []
         self.encoder = UTEncoder(
             enc_seq_len=self.hparams.enc_seq_len,
             d_model=self.hparams.d_model,
@@ -50,13 +51,16 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        self.log('train_loss_step', loss.detach(), on_step=True, on_epoch=False, sync_dist=True)
+        self.log('train_loss_step', loss.detach(), on_step=True, on_epoch=False)
         return loss
 
     def training_epoch_end(self, outputs):
         avg_loss = torch.stack([x['loss'] for x in outputs]).mean()
         tensorboard_logs = {'train_loss_epoch': avg_loss}
         self.logger.agg_and_log_metrics(tensorboard_logs, step=self.current_epoch)
+
+    def on_validation_epoch_start(self):
+        self.val_loss = []
 
     def validation_step(self, data, batch_idx):
         enc_input, dec_input, ground_truth, weight = data['encoder'], data['decoder'], data['target'], data['weight']
@@ -71,11 +75,11 @@ class UTWRS(pl.LightningModule):
         loss = F.cross_entropy(output.squeeze(0), ground_truth.squeeze()) * weight
         loss = loss.sum()/weight.sum()
 
-        return {'test_loss': loss.detach()}
+        self.val_loss.append(loss.detach())
+        self.log_dict({'test_loss': loss.detach(), 'step': self.current_epoch})
 
-    def validation_epoch_end(self, outputs):
-        print(outputs)
-        test_loss_mean = torch.stack([x['test_loss'] for x in outputs]).mean()
+    def validation_epoch_end(self):
+        test_loss_mean = torch.stack(self.val_loss).mean()
 
         tensorboard_logs = {'test_loss': test_loss_mean, 'step': self.current_epoch}
         return {'log': tensorboard_logs}
