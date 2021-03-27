@@ -26,6 +26,7 @@ def cli_main():
     parser = ArgumentParser()
     parser.add_argument('--base_folder', default='data', type=str)
     parser.add_argument('--dataset', default='BBC', type=str)
+    parser.add_argument('--shuffle', default=True, type=bool)
     parser = UTWRS.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()

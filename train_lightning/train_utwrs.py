@@ -20,6 +20,9 @@ class UTWRS(pl.LightningModule):
             d_model=self.hparams.d_model,
             d_inner=self.hparams.d_inner,
             h=self.hparams.n_heads,
+            layer_config=self.hparams.layer_config,
+            padding=self.hparams.padding,
+            transition_dropout=self.hparams.transition_dropout,
             t_steps=self.hparams.t_steps,
             dropout=self.hparams.dropout,
             enc_act_epilson=self.hparams.enc_act_epilson
@@ -31,6 +34,9 @@ class UTWRS(pl.LightningModule):
             d_model=self.hparams.d_model,
             d_inner=self.hparams.d_inner,
             h=self.hparams.n_heads,
+            layer_config=self.hparams.layer_config,
+            padding=self.hparams.padding,
+            transition_dropout=self.hparams.transition_dropout,
             t_steps=self.hparams.t_steps,
             dropout=self.hparams.dropout,
             dec_act_epilson=self.hparams.dec_act_epilson
@@ -85,4 +91,7 @@ class UTWRS(pl.LightningModule):
         parser.add_argument('--enc_act_epilson', default=0.1, type=float)
         parser.add_argument('--dec_act_epilson', default=0.1, type=float)
         parser.add_argument('--centered', default=False, type=bool)
+        parser.add_argument('--layer_config', default="ll", type=str)
+        parser.add_argument('--padding', default="left", type=str)
+        parser.add_argument('--transition_dropout', default=0.5, type=float)
         return parser

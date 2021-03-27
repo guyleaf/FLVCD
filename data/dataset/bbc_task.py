@@ -116,7 +116,7 @@ class BBCDataset(Dataset):
         return data
 
 class BBCDataModule(LightningDataModule):
-    def __init__(self, max_seq_length, max_summary_length, d_model, base_folder, train_paths, val_paths, test_paths=None):
+    def __init__(self, max_seq_length, max_summary_length, d_model, base_folder, train_paths, val_paths, test_paths=None, shuffle=False):
         super().__init__()
         self.base_folder = base_folder
         self.train_paths = train_paths
@@ -125,6 +125,7 @@ class BBCDataModule(LightningDataModule):
         self.max_seq_length = max_seq_length
         self.max_summary_length = max_summary_length
         self.d_model = d_model
+        self.shuffle = shuffle
     
     def setup(self, stage: Optional[str] = None):
         self.bbc_test = None
@@ -136,7 +137,7 @@ class BBCDataModule(LightningDataModule):
     
     def train_dataloader(self):
         self.bbc_train.load_data(range(len(self.train_paths)))
-        return AsynchronousLoader(DataLoader(self.bbc_train, num_workers=4, pin_memory=True))
+        return AsynchronousLoader(DataLoader(self.bbc_train, num_workers=4, pin_memory=True, shuffle=self.shuffle))
     
     def val_dataloader(self):
         self.bbc_val.load_data(range(len(self.val_paths)))
