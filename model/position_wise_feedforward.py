@@ -1,4 +1,6 @@
 from torch import nn
+from torch.nn.init import kaiming_uniform_, _calculate_fan_in_and_fan_out, uniform_
+from math import sqrt
 
 class PositionwiseFeedForward(nn.Module):
     """
@@ -25,7 +27,13 @@ class PositionwiseFeedForward(nn.Module):
 
         for lc, s in zip(list(layer_config), sizes):
             if lc == 'l':
-                layers.append(nn.Linear(*s))
+                x = nn.Linear(*s)
+                kaiming_uniform_(x.weight, nonlinearity='relu')
+                if x.bias is not None:
+                    fan_in, _ = _calculate_fan_in_and_fan_out(x.weight)
+                    bound = 1 / sqrt(fan_in)
+                    uniform_(x.bias, -bound, bound)
+                layers.append(x)
             elif lc == 'c':
                 layers.append(Conv(*s, kernel_size=3, pad_type=padding))
             else:
@@ -63,6 +71,12 @@ class Conv(nn.Module):
         padding = (kernel_size - 1, 0) if pad_type == 'left' else (kernel_size//2, (kernel_size - 1)//2)
         self.pad = nn.ConstantPad1d(padding, 0)
         self.conv = nn.Conv1d(input_size, output_size, kernel_size=kernel_size, padding=0)
+        kaiming_uniform_(self.conv.weight, nonlinearity='relu')
+        if self.conv.bias is not None:
+            fan_in, _ = _calculate_fan_in_and_fan_out(self.conv.weight)
+            bound = 1 / sqrt(fan_in)
+            uniform_(self.conv.bias, -bound, bound)
+        
 
     def forward(self, inputs):
         y = self.pad(inputs.permute(0, 2, 1))

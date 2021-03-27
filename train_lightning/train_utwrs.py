@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-import numpy as np
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -24,10 +23,11 @@ class UTWRS(pl.LightningModule):
             padding=self.hparams.padding,
             transition_dropout=self.hparams.transition_dropout,
             t_steps=self.hparams.t_steps,
+            inter_dropout=self.hparams.inter_dropout,
             dropout=self.hparams.dropout,
             enc_act_epilson=self.hparams.enc_act_epilson
         )
-        
+
         self.decoder = UTDecoder(
             enc_seq_len=self.hparams.enc_seq_len,
             dec_seq_len=self.hparams.dec_seq_len,
@@ -94,4 +94,5 @@ class UTWRS(pl.LightningModule):
         parser.add_argument('--layer_config', default="ll", type=str)
         parser.add_argument('--padding', default="left", type=str)
         parser.add_argument('--transition_dropout', default=0.5, type=float)
+        parser.add_argument('--inter_dropout', default=0.0, type=float)
         return parser

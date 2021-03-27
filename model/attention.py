@@ -1,14 +1,13 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-import math
 
 
 class Attention(nn.Module):
     def forward(self, query, key, value, mask):
         model_dim = query.size(-1)
 
-        query /= math.sqrt(model_dim)
+        query *= float(model_dim) ** -0.5
 
         # Calculating Attention Score
         scores = torch.matmul(query, key.transpose(-1, -2))
@@ -17,7 +16,8 @@ class Attention(nn.Module):
         _MASKING_VALUE = -1e+30 if scores.dtype == torch.float32 else -1e+4
 
         # Fill -1e9 when mask == 1
-        scores = scores.masked_fill(mask, _MASKING_VALUE)
+        if mask is not None:
+            scores = scores.masked_fill(mask, _MASKING_VALUE)
 
         # Calculating Attention with softmax
         attention = F.softmax(scores, dim=-1)
@@ -58,3 +58,9 @@ class MultiHeadAttention(nn.Module):
 
         # Return attention and value
         return sum_value
+
+if __name__ == '__main__':
+    test = MultiHeadAttention(10, 2)
+    x = torch.ones([1, 10, 10], dtype=torch.float)
+    y = test(x, x, x)
+    print(x, y)
