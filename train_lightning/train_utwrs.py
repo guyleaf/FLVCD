@@ -70,7 +70,7 @@ class UTWRS(pl.LightningModule):
         self.log('test_loss', loss, on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+        optimizer = torch.optim.RMSprop(self.parameters(), lr=self.hparams.lr, alpha=0.9, centered=self.hparams.centered)
         return optimizer
 
     @staticmethod
@@ -84,4 +84,5 @@ class UTWRS(pl.LightningModule):
         parser.add_argument('--t_steps', default=4, type=int)
         parser.add_argument('--enc_act_epilson', default=0.1, type=float)
         parser.add_argument('--dec_act_epilson', default=0.1, type=float)
+        parser.add_argument('--centered', default=False, type=bool)
         return parser
