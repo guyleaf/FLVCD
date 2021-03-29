@@ -3,10 +3,9 @@ from io import UnsupportedOperation
 
 from data.dataset.bbc_task import get_bbc_file_paths, BBCDataModule, get_bbc_max_seq_len, get_bbc_max_summary_len
 import pytorch_lightning as pl
-from pytorch_lightning import loggers as pl_loggers
 from pytorch_lightning.profiler import PyTorchProfiler
 from pytorch_lightning.loggers.neptune import NeptuneLogger
-from pytorch_lightning.callbacks import ModelCheckpoint, model_checkpoint
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 from train_lightning.train_utwrs import UTWRS
@@ -27,6 +26,8 @@ def cli_main():
     parser.add_argument('--base_folder', default='data', type=str)
     parser.add_argument('--dataset', default='BBC', type=str)
     parser.add_argument('--shuffle', default=True, type=bool)
+    parser.add_argument('--profiler', action="store_true")
+    parser.add_argument('--tags', action="append")
     parser = UTWRS.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
@@ -88,9 +89,9 @@ def cli_main():
         # ------------
         # training
         # ------------
-        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3, monitor='test_loss', save_last=True)
-        profiler = PyTorchProfiler(output_filename=f"{k}-fold_profiler", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50)
-        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold_logger")
+        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3, monitor='test_loss')
+        profiler = PyTorchProfiler(output_filename=f"profiles/{k}-fold_profiler", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50, enabled=args.profiler)
+        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold_logger", tags=args.tags)
         trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler, checkpoint_callback=model_checkpoint, track_grad_norm=2, log_every_n_steps=1000)
         trainer.fit(model, data_loader)
 
@@ -100,7 +101,8 @@ def cli_main():
             neptune_logger.experiment.log_artifact(k, model_name)
 
         # Log score of the best model checkpoint.
-        neptune_logger.experiment.set_property('best_model_score', model_checkpoint.best_model_score.tolist())
+        neptune_logger.experiment.set_property('best_model_loss', model_checkpoint.best_model_score.tolist())
+        neptune_logger.experiment.log_artifact('profiles')
 
 
 if __name__ == '__main__':
