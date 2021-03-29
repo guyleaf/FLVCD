@@ -27,7 +27,7 @@ def cli_main():
     parser.add_argument('--dataset', default='BBC', type=str)
     parser.add_argument('--shuffle', action="store_true", default=False)
     parser.add_argument('--memory_profile', action="store_true", default=False)
-    parser.add_argument('--tags', action="append", default=[])
+    parser.add_argument('--tags', nargs='*', default=[])
     parser = UTWRS.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
