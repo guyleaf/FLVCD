@@ -90,7 +90,7 @@ class UTWRS(pl.LightningModule):
         parser.add_argument('--t_steps', default=4, type=int)
         parser.add_argument('--enc_act_epilson', default=0.1, type=float)
         parser.add_argument('--dec_act_epilson', default=0.1, type=float)
-        parser.add_argument('--centered', default=False, type=bool)
+        parser.add_argument('--centered', action="store_true", default=False)
         parser.add_argument('--layer_config', default="ll", type=str)
         parser.add_argument('--padding', default="left", type=str)
         parser.add_argument('--transition_dropout', default=0.5, type=float)

@@ -26,7 +26,7 @@ def cli_main():
     parser.add_argument('--base_folder', default='data', type=str)
     parser.add_argument('--dataset', default='BBC', type=str)
     parser.add_argument('--shuffle', action="store_true", default=False)
-    parser.add_argument('--profiler', action="store_true", default=False)
+    parser.add_argument('--memory_profile', action="store_true", default=False)
     parser.add_argument('--tags', action="append", default=[])
     parser = UTWRS.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
