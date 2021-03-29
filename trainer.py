@@ -25,9 +25,9 @@ def cli_main():
     parser = ArgumentParser()
     parser.add_argument('--base_folder', default='data', type=str)
     parser.add_argument('--dataset', default='BBC', type=str)
-    parser.add_argument('--shuffle', default=True, type=bool)
-    parser.add_argument('--profiler', action="store_true")
-    parser.add_argument('--tags', action="append")
+    parser.add_argument('--shuffle', action="store_true", default=False)
+    parser.add_argument('--profiler', action="store_true", default=False)
+    parser.add_argument('--tags', action="append", default=[])
     parser = UTWRS.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
@@ -102,7 +102,8 @@ def cli_main():
 
         # Log score of the best model checkpoint.
         neptune_logger.experiment.set_property('best_model_loss', model_checkpoint.best_model_score.tolist())
-        neptune_logger.experiment.log_artifact('profiles')
+        if args.profiler:
+            neptune_logger.experiment.log_artifact('profiles')
 
 
 if __name__ == '__main__':
