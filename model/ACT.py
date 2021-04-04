@@ -6,7 +6,8 @@ class ACT(nn.Module):
     def __init__(self, fn, hidden_size, max_hop, timestamp_emb, position_emb, act_epilson):
         super(ACT, self).__init__()
         self.p = nn.Linear(hidden_size,1)
-        nn.init.ones_(self.p.bias)
+        nn.init.xavier_uniform_(self.p.weight) 
+        nn.init.zeros_(self.p.bias)
 
         self.threshold = 1 - act_epilson
         self.fn = fn
