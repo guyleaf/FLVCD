@@ -22,8 +22,8 @@ class PositionwiseFeedForward(nn.Module):
         
         layers = []
         sizes = ([(input_depth, filter_size)] + 
-                 [(filter_size, filter_size)]*(len(layer_config)-2) + 
-                 [(filter_size, output_depth)])
+                [(filter_size, filter_size)]*(len(layer_config)-2) + 
+                [(filter_size, output_depth)])
 
         for lc, s in zip(list(layer_config), sizes):
             if lc == 'l':
