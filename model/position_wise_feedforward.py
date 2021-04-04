@@ -76,7 +76,7 @@ class Conv(nn.Module):
             fan_in, _ = _calculate_fan_in_and_fan_out(self.conv.weight)
             bound = 1 / sqrt(fan_in)
             uniform_(self.conv.bias, -bound, bound)
-        
+
 
     def forward(self, inputs):
         y = self.pad(inputs.permute(0, 2, 1))

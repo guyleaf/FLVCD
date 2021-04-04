@@ -49,7 +49,8 @@ class UTDecoder(nn.Module):
         self.dec_act = ACT(decoder, d_model, t_steps, dec_sinusoid_emb, dec_sinusoid_emb, dec_act_epilson)
 
         # TODO: Add parameter for linear output
-        self.output_fc = nn.Linear(d_model, enc_seq_len)
+        self.output_fc = nn.Linear(d_model, enc_seq_len, bias=False)
+        nn.init.xavier_uniform_(self.output_fc.weight)
 
     def forward(self, enc_output, dec_input, src_mask, tgt_mask):
         y, _ = self.dec_act(dec_input, enc_output, src_mask, tgt_mask)

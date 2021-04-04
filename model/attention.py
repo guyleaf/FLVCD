@@ -36,8 +36,11 @@ class MultiHeadAttention(nn.Module):
         self.d_model_h = d_model // h
 
         # todo: linear should be defined with each H (e.g W_i of H)
-        self.linears = nn.ModuleList([nn.Linear(self.d_model, self.d_model) for _ in range(3)])
+        self.linears = nn.ModuleList([nn.Linear(self.d_model, self.d_model, bias=False) for _ in range(3)])
         self.h = h
+
+        for linear in self.linears:
+            nn.init.xavier_uniform_(linear.weight)
 
     def forward(self, query, key, value, mask=None):
         batch_size = query.size(0)
