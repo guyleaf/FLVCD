@@ -7,7 +7,7 @@ from .ACT import ACT
 
 
 class UTEncoder(nn.Module):
-    def __init__(self, enc_seq_len, d_model, d_inner, h, layer_config, padding, transition_dropout, t_steps=5, inter_dropout=0.0, dropout=0.5, enc_act_epilson=0.1):
+    def __init__(self, enc_seq_len, d_model, d_inner, h, layer_config, padding, transition_dropout, t_steps=5, dropout=0.5, enc_act_epilson=0.1):
         super(UTEncoder, self).__init__()
 
         enc_sinusoid_emb = PositionalEncoding(d_model, enc_seq_len)
@@ -19,24 +19,10 @@ class UTEncoder(nn.Module):
             enc_sinusoid_emb, 
             enc_act_epilson)
 
-        self.enc_2_act = ACT(
-            UTransformerEncoder(enc_seq_len, d_model, d_inner, h, layer_config, padding, transition_dropout, dropout), 
-            d_model, 
-            t_steps, 
-            enc_sinusoid_emb,
-            enc_sinusoid_emb, 
-            enc_act_epilson)
-        self.layer_norm = nn.LayerNorm(torch.Size([enc_seq_len, d_model]))
-        self.dropout = nn.Dropout(inter_dropout)
-
     def forward(self, enc_input, src_mask):
         x = enc_input
 
         x, _ = self.enc_1_act(x, source_mask=src_mask)
-        
-        x = self.layer_norm(enc_input + self.dropout(x))
-
-        x, _ = self.enc_2_act(x, source_mask=src_mask)
 
         return x
 
