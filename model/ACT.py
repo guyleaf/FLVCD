@@ -30,8 +30,8 @@ class ACT(nn.Module):
         # for l in range(self.num_layers):
         while(((halting_probability < self.threshold) & (n_updates < self.max_hop)).byte().any()):
             # Add timing signal
-            state = self.timestamp_emb(state, step)
-            state = self.position_emb(state, step)
+            state = self.timestamp_emb(state, step, type='step')
+            state = self.position_emb(state, step, type='position')
 
             p = torch.sigmoid(self.p(state)).squeeze(-1)
             # Mask for inputs which have not halted yet
