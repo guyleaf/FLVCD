@@ -72,6 +72,7 @@ class OVSDBBCDataset(Dataset):
             # END: label_length
             encoder[feature_length+1:] = float(-1)
             
+            print(labels)
             # START: 0
             decoder[0] = float(1)
             decoder[1:label_length+1] = features[labels]
