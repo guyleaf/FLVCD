@@ -2,7 +2,6 @@ from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning import LightningDataModule
 from pl_bolts.datamodules.async_dataloader import AsynchronousLoader
-import torch
 import h5py
 from tqdm import tqdm
 import numpy as np
@@ -10,31 +9,36 @@ import os
 from typing import Optional
 
 # helper functions
-def get_bbc_file_paths(base_folder):
+def get_file_paths(base_folder):
     return [base_folder + ("/" if base_folder[-1] != "/" else "") + i for i in os.listdir(base_folder) if i not in [".ipynb_checkpoints"]]
 
-def get_bbc_max_seq_len(base_folder):
-    file_paths = get_bbc_file_paths(base_folder)
+def get_max_seq_len(base_folder):
+    file_paths = get_file_paths(base_folder)
     lengths = []
     for i in file_paths:
         with h5py.File(i, 'r') as f:
-            lengths.append(f["features"].shape[0])
+            lengths.append(f["/features"].shape[0])
     return max(lengths)
 
-def get_bbc_max_summary_len(base_folder):
-    file_paths = get_bbc_file_paths(base_folder)
+def get_max_summary_len(base_folder):
+    file_paths = get_file_paths(base_folder)
     lengths = []
     for i in file_paths:
         with h5py.File(i, 'r') as f:
-            lengths.append(f["/labels/annotator_0"].shape[0] * 2)
+            if f.attrs["dataset_name"] == "BBC":
+                lengths.append(f["/labels/annotator_0"].shape[0] * 2)
+            elif f.attrs["dataset_name"] == "OVSD":
+                lengths.append(f["/labels"].shape[0] * 2)
+
     return max(lengths)
 
-class BBCDataset(Dataset):
+class OVSDBBCDataset(Dataset):
     '''
     Data format:
-        * h5.attr['dataset_name'] = "BBC"
+        * h5.attr['dataset_name']
         * h5['/features']: Shape[seq_len, 1, d_model]
-        * h5['/labels/annotator_0~4']: Shape[summary_len, 1], [(starting_frame, end_frame)]
+        * BBC: h5['/labels/annotator_0~4']: Shape[summary_len, 1], [(starting_frame, end_frame)]
+        * OVSD: h5['/labels']: Shape[summary_len, 1], [(starting_frame, end_frame)]
     Output:
         * encoder: Shape[1, max_seq_length, d_model]
         * decoder: Shape[1, max_summary_length, d_model]
@@ -44,8 +48,7 @@ class BBCDataset(Dataset):
         * START: 1
         * END: 0
     '''
-    def __init__(self, base_folder, file_paths, max_seq_length, max_summary_length, d_model):
-        self.base_folder = base_folder
+    def __init__(self, file_paths, max_seq_length, max_summary_length, d_model):
         self.file_paths = file_paths
         self.data_cache = {}
         self.max_seq_length = max_seq_length + 2
@@ -91,9 +94,9 @@ class BBCDataset(Dataset):
         with h5py.File(file_path, 'r') as f:
             if f.attrs["dataset_name"] == "BBC":
                 self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels/annotator_0'][()])]
-            else:
+            elif f.attrs["dataset_name"] == "OVSD":
                 self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()])]
-    
+
     def get_name(self, index):
         return self.data_cache[self.file_paths[index]][0]
     
@@ -103,9 +106,9 @@ class BBCDataset(Dataset):
     def clear_cache(self):
         self.data_cache = {}
 
-    def load_data(self, incides):
-        for i in tqdm(incides, total=len(incides), desc="Loading data"):
-            self._load_data(self.file_paths[i])
+    def load_data(self):
+        for file_path in tqdm(self.file_paths, total=len(self.file_paths), desc="Loading data"):
+            self._load_data(file_path)
         self.prepare_data()
 
     def get_labels(self, index):
@@ -115,10 +118,9 @@ class BBCDataset(Dataset):
         data = self.data_cache[self.file_paths[index]]
         return data
 
-class BBCDataModule(LightningDataModule):
-    def __init__(self, max_seq_length, max_summary_length, d_model, base_folder, train_paths, val_paths, test_paths=None, shuffle=False):
+class OVSDBBCDataModule(LightningDataModule):
+    def __init__(self, max_seq_length, max_summary_length, d_model, train_paths, val_paths, test_paths=None, shuffle=False):
         super().__init__()
-        self.base_folder = base_folder
         self.train_paths = train_paths
         self.val_paths = val_paths
         self.test_paths = test_paths
@@ -126,24 +128,24 @@ class BBCDataModule(LightningDataModule):
         self.max_summary_length = max_summary_length
         self.d_model = d_model
         self.shuffle = shuffle
-    
+
     def setup(self, stage: Optional[str] = None):
-        self.bbc_test = None
+        self.test = None
         if self.test_paths is not None:
-            self.bbc_test = BBCDataset(self.base_folder, self.test_paths, self.max_seq_length, self.max_summary_length, self.d_model)
-    
-        self.bbc_train = BBCDataset(self.base_folder, self.train_paths, self.max_seq_length, self.max_summary_length, self.d_model)
-        self.bbc_val = BBCDataset(self.base_folder, self.val_paths, self.max_seq_length, self.max_summary_length, self.d_model)
-    
+            self.test = OVSDBBCDataset(self.test_paths, self.max_seq_length, self.max_summary_length, self.d_model)
+
+        self.train = OVSDBBCDataset(self.train_paths, self.max_seq_length, self.max_summary_length, self.d_model)
+        self.val = OVSDBBCDataset(self.val_paths, self.max_seq_length, self.max_summary_length, self.d_model)
+
     def train_dataloader(self):
-        self.bbc_train.load_data(range(len(self.train_paths)))
-        return AsynchronousLoader(DataLoader(self.bbc_train, num_workers=4, pin_memory=True, shuffle=self.shuffle))
-    
+        self.train.load_data()
+        return AsynchronousLoader(DataLoader(self.train, num_workers=4, pin_memory=True, shuffle=self.shuffle))
+
     def val_dataloader(self):
-        self.bbc_val.load_data(range(len(self.val_paths)))
-        return AsynchronousLoader(DataLoader(self.bbc_val, num_workers=4, pin_memory=True))
-    
+        self.val.load_data()
+        return AsynchronousLoader(DataLoader(self.val, num_workers=4, pin_memory=True))
+
     def test_dataloader(self):
-        if self.bbc_test is not None:
-            self.bbc_test.load_data(range(len(self.test_paths)))
-            return AsynchronousLoader(DataLoader(self.bbc_test, num_workers=4, pin_memory=True))
+        if self.test is not None:
+            self.test.load_data()
+            return AsynchronousLoader(DataLoader(self.test, num_workers=4, pin_memory=True))
