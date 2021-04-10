@@ -95,10 +95,10 @@ class OVSDBBCDataset(Dataset):
         with h5py.File(file_path, 'r') as f:
             if f.attrs["dataset_name"] == "BBC":
                 self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels/annotator_0'][()])]
-                # print(f['/labels/annotator_0'][()])
+                print(f['/labels/annotator_0'][()])
             elif f.attrs["dataset_name"] == "OVSD":
                 self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()])]
-                print(f['/labels'][()])
+                # print(f['/labels'][()])
 
     def get_name(self, index):
         return self.data_cache[self.file_paths[index]][0]
