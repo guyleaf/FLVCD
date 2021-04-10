@@ -87,6 +87,7 @@ def cli_main():
     for i, dataset in enumerate(file_paths):
         Y += [i] * (len(dataset) - 2)
 
+    train_paths = np.array(train_paths)
     for k, (train, val) in enumerate(tqdm(kfold.split(X, Y), total=kfold.get_n_splits())):
         print(f"Training data: f{train_paths[train]}")
         print(f"Validation data: f{train_paths[val]}")
