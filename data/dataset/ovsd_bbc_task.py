@@ -57,6 +57,7 @@ class OVSDBBCDataset(Dataset):
 
     def prepare_data(self):
         for key in self.data_cache.keys():
+            print(key)
             features = self.data_cache[key][1].squeeze(1)
             labels = self.data_cache[key][2].flatten()
 
