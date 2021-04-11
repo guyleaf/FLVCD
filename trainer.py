@@ -12,8 +12,8 @@ from sklearn.model_selection import StratifiedKFold
 import numpy as np
 from tqdm import tqdm
 
-SRC_PAD_TOKEN = -1
-TRG_PAD_TOKEN = -1
+SRC_PAD_TOKEN = 0
+TRG_PAD_TOKEN = 0
 
 def cli_main():
     pl.seed_everything(1234)
