@@ -138,7 +138,6 @@ def cli_main():
         # ------------
         profiler = PyTorchProfiler(
             output_filename=f"profiles/{k}-fold_profiler",
-            use_cuda=True,
             profile_memory=True,
             sort_by_key="cuda_memory_usage",
             row_limit=50,
