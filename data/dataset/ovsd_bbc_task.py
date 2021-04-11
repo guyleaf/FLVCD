@@ -78,7 +78,7 @@ class OVSDBBCDataset(Dataset):
 
             # START: 0
             decoder[0] = float(1)
-            decoder[1:label_length+1] = features[indices]
+            decoder[1:label_length+1] = features[indices].squeeze(1)
             # END: label_length+1
             decoder[label_length+1:] = float(0)
 
