@@ -44,7 +44,7 @@ class OVSDBBCDataset(Dataset):
         * decoder: Shape[1, max_summary_length, d_model]
         * target: Shape[1, max_summary_length]
     PROCESS:
-        * PADDING: -1
+        * PADDING: 0
         * START: 1
         * END: 0
     '''
@@ -57,9 +57,9 @@ class OVSDBBCDataset(Dataset):
 
     def prepare_data(self):
         for key in self.data_cache.keys():
-            print(key)
             features = self.data_cache[key][1].squeeze(1)
             labels = self.data_cache[key][2].flatten()
+            frame_indices = self.data_cache[key][3]
 
             encoder = np.zeros((self.max_seq_length, self.d_model), dtype=np.float32)
             decoder = np.zeros((self.max_summary_length, self.d_model), dtype=np.float32)
@@ -68,19 +68,22 @@ class OVSDBBCDataset(Dataset):
 
             feature_length = features.shape[0]
             label_length = labels.shape[0]
-            print(feature_length)
+
             encoder[:feature_length] = features
             # END: label_length
-            encoder[feature_length+1:] = float(-1)
+            encoder[feature_length:] = float(0)
             
+            # get target index of frames from extracted frames because of downsampling
+            indices = np.array([np.nonzero(frame_indices == i)[0] for i in labels])
+
             # START: 0
             decoder[0] = float(1)
-            decoder[1:label_length+1] = features[labels]
+            decoder[1:label_length+1] = features[indices]
             # END: label_length+1
-            decoder[label_length+2:] = float(-1)
+            decoder[label_length+1:] = float(0)
 
-            target[:label_length] = labels
-            # END: label_length+1
+            target[:label_length] = indices
+            # END: label_length
             weight[:label_length+1] = float(1)
             target[label_length:] = feature_length
 
@@ -94,9 +97,9 @@ class OVSDBBCDataset(Dataset):
     def _load_data(self, file_path):
         with h5py.File(file_path, 'r') as f:
             if f.attrs["dataset_name"] == "BBC":
-                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels/annotator_0'][()])]
+                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels/annotator_0'][()]), np.array(f['/frame_incides'][()])]
             elif f.attrs["dataset_name"] == "OVSD":
-                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()])]
+                self.data_cache[file_path] = [f.attrs["dataset_name"], np.array(f['/features'][()]), np.array(f['/labels'][()]), np.array(f['/frame_incides'][()])]
 
     def get_name(self, index):
         return self.data_cache[self.file_paths[index]][0]
