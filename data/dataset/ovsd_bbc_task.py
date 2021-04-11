@@ -74,11 +74,11 @@ class OVSDBBCDataset(Dataset):
             encoder[feature_length:] = float(0)
             
             # get target index of frames from extracted frames because of downsampling
-            indices = np.array([np.nonzero(frame_indices == i)[0] for i in labels])
+            indices = np.array([np.nonzero(frame_indices == i)[0] for i in labels]).squeeze(1)
 
             # START: 0
             decoder[0] = float(1)
-            decoder[1:label_length+1] = features[indices].squeeze(1)
+            decoder[1:label_length+1] = features[indices]
             # END: label_length+1
             decoder[label_length+1:] = float(0)
 
