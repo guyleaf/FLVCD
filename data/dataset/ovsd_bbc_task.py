@@ -123,7 +123,7 @@ class OVSDBBCDataset(Dataset):
         return data
 
 class OVSDBBCDataModule(LightningDataModule):
-    def __init__(self, max_seq_length, max_summary_length, d_model, train_paths, val_paths, test_paths=None, shuffle=False):
+    def __init__(self, max_seq_length, max_summary_length, d_model, train_paths, val_paths, test_paths=None, shuffle=False, use_tpu=False):
         super().__init__()
         self.train_paths = train_paths
         self.val_paths = val_paths
@@ -132,6 +132,7 @@ class OVSDBBCDataModule(LightningDataModule):
         self.max_summary_length = max_summary_length
         self.d_model = d_model
         self.shuffle = shuffle
+        self.use_tpu = use_tpu
 
     def setup(self, stage: Optional[str] = None):
         self.test = None
@@ -143,13 +144,22 @@ class OVSDBBCDataModule(LightningDataModule):
 
     def train_dataloader(self):
         self.train.load_data()
-        return AsynchronousLoader(DataLoader(self.train, num_workers=4, pin_memory=True, shuffle=self.shuffle))
+        if self.use_tpu:
+            return DataLoader(self.train, num_workers=4, pin_memory=True, shuffle=self.shuffle)
+        else:
+            return AsynchronousLoader(DataLoader(self.train, num_workers=4, pin_memory=True, shuffle=self.shuffle))
 
     def val_dataloader(self):
         self.val.load_data()
-        return AsynchronousLoader(DataLoader(self.val, num_workers=4, pin_memory=True))
+        if self.use_tpu:
+            return DataLoader(self.val, num_workers=4, pin_memory=True)
+        else:
+            return AsynchronousLoader(DataLoader(self.val, num_workers=4, pin_memory=True))
 
     def test_dataloader(self):
         if self.test is not None:
             self.test.load_data()
-            return AsynchronousLoader(DataLoader(self.test, num_workers=4, pin_memory=True))
+            if self.use_tpu:
+                return DataLoader(self.test, num_workers=4, pin_memory=True)
+            else:
+                return AsynchronousLoader(DataLoader(self.test, num_workers=4, pin_memory=True))

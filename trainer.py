@@ -25,6 +25,7 @@ def cli_main():
     parser.add_argument('--base_folders', nargs='+', default=[], required=True)
     parser.add_argument('--datasets', nargs='+', default=[], required=True)
     parser.add_argument('--shuffle', action="store_true", default=False)
+    parser.add_argument('--use_tpu', action="store_true", default=False)
     parser.add_argument('--memory_profile', action="store_true", default=False)
     parser.add_argument('--tags', nargs='*', default=[])
     parser = UTWRS.add_model_specific_args(parser)
@@ -94,7 +95,15 @@ def cli_main():
         # ------------
         # data loader
         # ------------
-        data_loader = OVSDBBCDataModule(max_seq_length, max_summary_length, args.d_model, train_paths[train], train_paths[val])
+        data_loader = OVSDBBCDataModule(
+            max_seq_length,
+            max_summary_length,
+            args.d_model,
+            train_paths[train],
+            train_paths[val],
+            shuffle=args.shuffle,
+            use_tpu=args.use_tpu
+        )
 
         # ------------
         # model
@@ -104,24 +113,49 @@ def cli_main():
         # ------------
         # neptune logger
         # ------------
-        neptune_logger = NeptuneLogger(project_name="guyleaf/UTWRS", params=vars(args), experiment_name=f"{k+1}-fold_logger", tags=args.tags)
+        neptune_logger = NeptuneLogger(
+            project_name="guyleaf/UTWRS", 
+            params=vars(args),
+            experiment_name=f"{k+1}-fold_logger",
+            tags=args.tags
+        )
         neptune_logger.experiment.log_text("training_data", ','.join(train_paths[train]))
         neptune_logger.experiment.log_text("validation_data", ','.join(train_paths[val]))
 
         # ------------
         # checkpoint
         # ------------
-        model_checkpoint = ModelCheckpoint(dirpath="checkpoints", filename='{epoch:02d}_{test_loss:.2f}', save_top_k=3, monitor='test_loss', mode='min')
+        model_checkpoint = ModelCheckpoint(
+            dirpath="checkpoints",
+            filename='{epoch:02d}_{test_loss:.2f}',
+            save_top_k=3,
+            monitor='test_loss',
+            mode='min'
+        )
 
         # ------------
         # profiler
         # ------------
-        profiler = PyTorchProfiler(output_filename=f"profiles/{k}-fold_profiler", use_cuda=True, profile_memory=True, sort_by_key="cuda_memory_usage", row_limit=50, enabled=args.memory_profile)
+        profiler = PyTorchProfiler(
+            output_filename=f"profiles/{k}-fold_profiler",
+            use_cuda=True,
+            profile_memory=True,
+            sort_by_key="cuda_memory_usage",
+            row_limit=50,
+            enabled=args.memory_profile
+        )
 
         # ------------
         # training
         # ------------
-        trainer = pl.Trainer.from_argparse_args(args, logger=neptune_logger, profiler=profiler, checkpoint_callback=model_checkpoint, track_grad_norm=2, log_every_n_steps=100)
+        trainer = pl.Trainer.from_argparse_args(
+            args,
+            logger=neptune_logger,
+            profiler=profiler,
+            checkpoint_callback=model_checkpoint,
+            track_grad_norm=2,
+            log_every_n_steps=100
+        )
         trainer.fit(model, data_loader)
 
         # Log model checkpoint to Neptune
