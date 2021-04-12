@@ -59,7 +59,6 @@ class MultiHeadAttention(nn.Module):
         # Applying Dot-Product Attention
         _, sum_value = self.attention(_query, _key, _value, mask)
 
-        print(sum_value.shape)
         # Concat H distributed Attention
         # attention = attention.view(batch_size, query.size(1), _key.size(1))
         sum_value = sum_value.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
