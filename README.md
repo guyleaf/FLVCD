@@ -3,9 +3,9 @@
 # Frame-level Video Scene Detection
 
 </div>
- 
+
 ## Description   
-This repository is for academic research "Frame-level Video Scene Detection". It includes the models we proposed and data preprocessing script.
+This repository is for academic research [Frame-level Video Scene Detection](https://docs.google.com/document/d/1uEUj1zjJb20lyfE-72TVFgazpLEaszyZHGYwsjpEA08/edit?usp=sharing). It includes the models we proposed and data preprocessing script.
 
 ## How to run   
 First, install dependencies   
